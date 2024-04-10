@@ -2,13 +2,20 @@ version: "3.8"
 
 services:
   comfyui:
-    image: timpietruskyblibla/runpod-worker-comfy:latest
-    container_name: comfyui-worker
+    image: runpod-worker-comfy:latest
+    container_name: runpod-worker-comfy
     environment:
       - NVIDIA_VISIBLE_DEVICES=all
       - SERVE_API_LOCALLY=true
+      - API_KEY=48cb2e465c6d40bea159ca3080257bca
     ports:
       - "8000:8000"
-    runtime: nvidia
     volumes:
       - ./data/comfyui/output:/comfyui/output
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              device_ids: [ '0' ]
+              capabilities: [ gpu ]

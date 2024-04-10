@@ -1,7 +1,9 @@
 .DS_Store
 venv
 .env
+.idea
 data
 models
+checkpoints
 simulated_uploaded
 __pycache__

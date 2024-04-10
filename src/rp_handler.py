@@ -1,13 +1,15 @@
-import runpod
-from runpod.serverless.utils import rp_upload
-import json
-import urllib.request
-import urllib.parse
-import time
-import os
-import requests
 import base64
 from io import BytesIO
+import json
+import os
+import time
+import urllib.parse
+import urllib.request
+
+import numpy as np
+import requests
+import runpod
+from runpod.serverless.utils import rp_upload
 
 # Time to wait between API check attempts in milliseconds
 COMFY_API_AVAILABLE_INTERVAL_MS = 50
@@ -16,7 +18,7 @@ COMFY_API_AVAILABLE_MAX_RETRIES = 500
 # Time to wait between poll attempts in milliseconds
 COMFY_POLLING_INTERVAL_MS = 250
 # Maximum number of poll attempts
-COMFY_POLLING_MAX_RETRIES = 500
+COMFY_POLLING_MAX_RETRIES = 1000
 # Host where ComfyUI is running
 COMFY_HOST = "127.0.0.1:8188"
 # Enforce a clean state after each job is done
@@ -62,8 +64,11 @@ def validate_input(job_input):
                 "'images' must be a list of objects with 'name' and 'image' keys",
             )
 
+    # Validate and process fedata (additional data to replace inputs in the workflow)
+    fedata = job_input.get("fedata")
+
     # Return validated data and no error
-    return {"workflow": workflow, "images": images}, None
+    return {"workflow": workflow, "images": images, "fedata": fedata}, None
 
 
 def check_server(url, retries=50, delay=500):
@@ -151,6 +156,29 @@ def upload_images(images):
         "message": "All images uploaded successfully",
         "details": responses,
     }
+
+
+def change_workflow(workflow, prompts_db, fedata):
+
+    # Get data from prompts_db
+    for item in prompts_db:
+
+        if item['category'] == fedata['category'] and item['style'] == fedata['style']:
+            fedata['prompt'] = item['prompt']
+            fedata['background_prompt'] = item['background']
+            fedata['bg_flag'] = item['bground_flag']
+            fedata['negative_bg_prompt'] = item['negative_prompts']
+
+    # Change workflow
+    if fedata['bg_flag'] == 'TRUE':
+        workflow['99']['inputs']['text'] = fedata['prompt'] + ', ' + fedata['background_prompt']
+        workflow["8"]["inputs"]["text_g"] = fedata['negative_bg_prompt']
+        workflow['9']["inputs"]["seed"] = np.random.randint(10e16)
+
+    elif fedata['bg_flag'] == 'FALSE':
+        pass
+
+    return workflow
 
 
 def queue_workflow(workflow):
@@ -288,14 +316,23 @@ def handler(job):
     """
     job_input = job["input"]
 
+    # Validate 'api_key' in input
+    if job_input.get("api_key") != os.environ.get("API_KEY"):
+        return {"error": f"Invalid API Key: {job_input.get('api_key')}"}
+
     # Make sure that the input is valid
     validated_data, error_message = validate_input(job_input)
     if error_message:
         return {"error": error_message}
 
     # Extract validated data
-    workflow = validated_data["workflow"]
+    workflow = validated_data.get("workflow")
     images = validated_data.get("images")
+    fedata = validated_data.get("fedata")
+
+    # Read prompts database
+    with open('./prompts_db.json', 'r') as j:
+        prompts_db = json.load(j)
 
     # Make sure that the ComfyUI API is available
     check_server(
@@ -312,6 +349,7 @@ def handler(job):
 
     # Queue the workflow
     try:
+        workflow = change_workflow(workflow, prompts_db, fedata)
         queued_workflow = queue_workflow(workflow)
         prompt_id = queued_workflow["prompt_id"]
         print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")

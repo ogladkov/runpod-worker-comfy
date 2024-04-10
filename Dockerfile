@@ -6,14 +6,17 @@ ENV DEBIAN_FRONTEND=noninteractive
 # Prefer binary wheels over source distributions for faster pip installations
 ENV PIP_PREFER_BINARY=1
 # Ensures output from python is printed immediately to the terminal without buffering
-ENV PYTHONUNBUFFERED=1 
+ENV PYTHONUNBUFFERED=1
 
 # Install Python, git and other necessary tools
 RUN apt-get update && apt-get install -y \
     python3.10 \
     python3-pip \
     git \
-    wget
+    wget \
+    libglib2.0-0 \
+    build-essential \
+    libgl1
 
 # Clean up to reduce image size
 RUN apt-get autoremove -y && apt-get clean -y && rm -rf /var/lib/apt/lists/*
@@ -25,28 +28,54 @@ RUN git clone https://github.com/comfyanonymous/ComfyUI.git /comfyui
 WORKDIR /comfyui
 
 # Install ComfyUI dependencies
-RUN pip3 install --no-cache-dir torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 \
-    && pip3 install --no-cache-dir xformers==0.0.21 \
-    && pip3 install -r requirements.txt
+RUN pip3 install -r requirements.txt
 
-# Install runpod
-RUN pip3 install runpod requests
 
-# Download checkpoints/vae/LoRA to include in image
-RUN wget -O models/checkpoints/sd_xl_base_1.0.safetensors https://huggingface.co/stabilityai/stable-diffusion-xl-base-1.0/resolve/main/sd_xl_base_1.0.safetensors
-RUN wget -O models/vae/sdxl_vae.safetensors https://huggingface.co/stabilityai/sdxl-vae/resolve/main/sdxl_vae.safetensors
-RUN wget -O models/vae/sdxl-vae-fp16-fix.safetensors https://huggingface.co/madebyollin/sdxl-vae-fp16-fix/resolve/main/sdxl_vae.safetensors
-RUN wget -O models/loras/xl_more_art-full_v1.safetensors https://civitai.com/api/download/models/152309
+# Install WAS Node
+WORKDIR /comfyui/custom_nodes
+RUN git clone https://github.com/WASasquatch/was-node-suite-comfyui.git
+WORKDIR /comfyui/custom_nodes/was-node-suite-comfyui
+RUN pip3 install -r requirements.txt
 
-# Example for adding specific models into image
-# ADD models/checkpoints/sd_xl_base_1.0.safetensors models/checkpoints/
-# ADD models/vae/sdxl_vae.safetensors models/vae/
+WORKDIR /comfyui/custom_nodes
+
+# Install FacePasing
+RUN git clone https://github.com/Ryuukeisyou/comfyui_face_parsing.git
+
+# Install IPAdapter
+RUN git clone https://github.com/cubiq/ComfyUI_IPAdapter_plus.git
+
+# Install ComfyUI Various
+RUN git clone https://github.com/jamesWalker55/comfyui-various
+
+# Install InstantID
+RUN git clone https://github.com/cubiq/ComfyUI_InstantID.git
+
+RUN pip3 install transformers==4.26.1
+#RUN pip3 install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121
+RUN pip3 install runpod requests ultralytics opencv-contrib-python xformers insightface==0.7.3 onnxruntime-gpu==1.16.2
 
 # Go back to the root
-WORKDIR /
+WORKDIR /comfyui
+
+# Copy models
+COPY checkpoints/sdxl/juggernautXL_v9Rundiffusionphoto2.safetensors /comfyui/models/checkpoints/
+COPY checkpoints/controlnet/instantid/diffusion_pytorch_model.safetensors /comfyui/models/controlnet/instantid/
+COPY checkpoints/instantid/ip-adapter.bin /comfyui/models/instantid/
+COPY checkpoints/blip/model_base_vqa_capfilt_large.pth /comfyui/models/blip/checkpoints/
+COPY checkpoints/face_parsing/* /comfyui/models/face_parsing/
+COPY checkpoints/ipadapter/ip-adapter-plus-face_sdxl_vit-h.safetensors /comfyui/models/ipadapter/
+COPY checkpoints/ipadapter/ip-adapter-plus_sdxl_vit-h.safetensors /comfyui/models/ipadapter/
+COPY checkpoints/clip_vision/CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors /comfyui/models/clip_vision/
+COPY checkpoints/ultralytics/face_yolov8m.pt /comfyui/models/ultralytics/bbox/
+COPY checkpoints/insightface/models/antelopev2/* /comfyui/models/insightface/models/antelopev2/
+COPY checkpoints/insightface/inswapper_128.onnx /comfyui/models/insightface/
+
+# Copy the prompt database
+COPY ./prompts_db.json /comfyui/
 
 # Add the start and the handler
-ADD src/start.sh src/rp_handler.py test_input.json ./
+COPY src/start.sh src/rp_handler.py test_input.json /
 RUN chmod +x /start.sh
 
 # Start the container
