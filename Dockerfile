@@ -36,7 +36,6 @@ WORKDIR /comfyui/custom_nodes
 RUN git clone https://github.com/WASasquatch/was-node-suite-comfyui.git
 WORKDIR /comfyui/custom_nodes/was-node-suite-comfyui
 RUN pip3 install -r requirements.txt
-
 WORKDIR /comfyui/custom_nodes
 
 # Install FacePasing
@@ -55,12 +54,31 @@ RUN pip3 install transformers==4.26.1
 #RUN pip3 install torch==2.1.1 torchvision==0.16.1 torchaudio==2.1.1 --index-url https://download.pytorch.org/whl/cu121
 RUN pip3 install runpod requests ultralytics opencv-contrib-python xformers insightface==0.7.3 onnxruntime-gpu==1.16.2
 
+###### NOBG
+# Install Impact Pack
+RUN git clone https://github.com/ltdrdata/ComfyUI-Impact-Pack.git
+WORKDIR /comfyui/custom_nodes/ComfyUI-Impact-Pack
+RUN pip3 install --no-cache-dir -r requirements.txt
+RUN python3 install.py
+WORKDIR /comfyui/custom_nodes
+
+# Install ControlNet aux
+RUN git clone https://github.com/Fannovel16/comfyui_controlnet_aux.git
+WORKDIR /comfyui/custom_nodes/comfyui_controlnet_aux
+RUN pip3 install --no-cache-dir -r requirements.txt
+WORKDIR /comfyui/custom_nodes
+
+# Install Masquerade Nodes
+RUN git clone https://github.com/BadCafeCode/masquerade-nodes-comfyui.git
+###### NOBG
+
 # Go back to the root
 WORKDIR /comfyui
 
 # Copy models
 COPY checkpoints/sdxl/juggernautXL_v9Rundiffusionphoto2.safetensors /comfyui/models/checkpoints/
 COPY checkpoints/controlnet/instantid/diffusion_pytorch_model.safetensors /comfyui/models/controlnet/instantid/
+COPY checkpoints/controlnet/diffusers_xl_canny_full.safetensors /comfyui/models/controlnet/
 COPY checkpoints/instantid/ip-adapter.bin /comfyui/models/instantid/
 COPY checkpoints/blip/model_base_vqa_capfilt_large.pth /comfyui/models/blip/checkpoints/
 COPY checkpoints/face_parsing/* /comfyui/models/face_parsing/
@@ -71,8 +89,9 @@ COPY checkpoints/ultralytics/face_yolov8m.pt /comfyui/models/ultralytics/bbox/
 COPY checkpoints/insightface/models/antelopev2/* /comfyui/models/insightface/models/antelopev2/
 COPY checkpoints/insightface/inswapper_128.onnx /comfyui/models/insightface/
 
-# Copy the prompt database
+# Copy the prompt database and workflows
 COPY ./prompts_db.json /comfyui/
+COPY ./workflows/*.json /comfyui/workflows/
 
 # Add the start and the handler
 COPY src/start.sh src/rp_handler.py test_input.json /

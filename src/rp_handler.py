@@ -49,9 +49,9 @@ def validate_input(job_input):
             return None, "Invalid JSON format in input"
 
     # Validate 'workflow' in input
-    workflow = job_input.get("workflow")
-    if workflow is None:
-        return None, "Missing 'workflow' parameter"
+    # workflow = job_input.get("workflow")
+    # if workflow is None:
+    #     return None, "Missing 'workflow' parameter"
 
     # Validate 'images' in input, if provided
     images = job_input.get("images")
@@ -68,7 +68,7 @@ def validate_input(job_input):
     fedata = job_input.get("fedata")
 
     # Return validated data and no error
-    return {"workflow": workflow, "images": images, "fedata": fedata}, None
+    return {"images": images, "fedata": fedata}, None
 
 
 def check_server(url, retries=50, delay=500):
@@ -158,7 +158,7 @@ def upload_images(images):
     }
 
 
-def change_workflow(workflow, prompts_db, fedata):
+def get_workflow(prompts_db, fedata):
 
     # Get data from prompts_db
     for item in prompts_db:
@@ -171,12 +171,21 @@ def change_workflow(workflow, prompts_db, fedata):
 
     # Change workflow
     if fedata['bg_flag'] == 'TRUE':
+
+        with open('./workflows/bg.json', 'r') as j:
+            workflow = json.load(j)
+
         workflow['99']['inputs']['text'] = fedata['prompt'] + ', ' + fedata['background_prompt']
         workflow["8"]["inputs"]["text_g"] = fedata['negative_bg_prompt']
         workflow['9']["inputs"]["seed"] = np.random.randint(10e16)
 
     elif fedata['bg_flag'] == 'FALSE':
-        pass
+
+        with open('./workflows/nobg.json', 'r') as j:
+            workflow = json.load(j)
+
+        workflow['160']['inputs']['text'] = fedata['prompt']
+        workflow['34']['inputs']['text_g'] = fedata['negative_bg_prompt']
 
     return workflow
 
@@ -326,7 +335,6 @@ def handler(job):
         return {"error": error_message}
 
     # Extract validated data
-    workflow = validated_data.get("workflow")
     images = validated_data.get("images")
     fedata = validated_data.get("fedata")
 
@@ -349,7 +357,7 @@ def handler(job):
 
     # Queue the workflow
     try:
-        workflow = change_workflow(workflow, prompts_db, fedata)
+        workflow = get_workflow(prompts_db, fedata)
         queued_workflow = queue_workflow(workflow)
         prompt_id = queued_workflow["prompt_id"]
         print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")

@@ -1,0 +1,712 @@
+{
+  "1": {
+    "inputs": {
+      "image": "input.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "10": {
+    "inputs": {
+      "ckpt_name": "juggernautXL_v9Rundiffusionphoto2.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "32": {
+    "inputs": {
+      "samples": [
+        "46",
+        0
+      ],
+      "mask": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "SetLatentNoiseMask",
+    "_meta": {
+      "title": "Set Latent Noise Mask"
+    }
+  },
+  "34": {
+    "inputs": {
+      "width": 4096,
+      "height": 4096,
+      "crop_w": 0,
+      "crop_h": 0,
+      "target_width": 1024,
+      "target_height": 1024,
+      "text_g": "",
+      "text_l": "CLIP_L",
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncodeSDXL",
+    "_meta": {
+      "title": "CLIPTextEncodeSDXL"
+    }
+  },
+  "35": {
+    "inputs": {
+      "width": 4096,
+      "height": 4096,
+      "crop_w": 0,
+      "crop_h": 0,
+      "target_width": 1024,
+      "target_height": 1024,
+      "text_g": [
+        "287",
+        0
+      ],
+      "text_l": "high sharpness",
+      "clip": [
+        "10",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncodeSDXL",
+    "_meta": {
+      "title": "CLIPTextEncodeSDXL"
+    }
+  },
+  "36": {
+    "inputs": {
+      "seed": 1055277007753214,
+      "steps": 35,
+      "cfg": 6,
+      "sampler_name": "dpmpp_2m_sde_gpu",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "10",
+        0
+      ],
+      "positive": [
+        "37",
+        0
+      ],
+      "negative": [
+        "37",
+        1
+      ],
+      "latent_image": [
+        "32",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "37": {
+    "inputs": {
+      "strength": 1,
+      "start_percent": 0.1,
+      "end_percent": 1,
+      "positive": [
+        "35",
+        0
+      ],
+      "negative": [
+        "34",
+        0
+      ],
+      "control_net": [
+        "38",
+        0
+      ],
+      "image": [
+        "154",
+        0
+      ]
+    },
+    "class_type": "ControlNetApplyAdvanced",
+    "_meta": {
+      "title": "Apply ControlNet (Advanced)"
+    }
+  },
+  "38": {
+    "inputs": {
+      "control_net_name": "diffusers_xl_canny_full.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "40": {
+    "inputs": {
+      "samples": [
+        "36",
+        0
+      ],
+      "vae": [
+        "10",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "46": {
+    "inputs": {
+      "pixels": [
+        "1",
+        0
+      ],
+      "vae": [
+        "10",
+        2
+      ]
+    },
+    "class_type": "VAEEncode",
+    "_meta": {
+      "title": "VAE Encode"
+    }
+  },
+  "56": {
+    "inputs": {
+      "model": [
+        "57",
+        0
+      ],
+      "processor": [
+        "58",
+        0
+      ],
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "FaceParse(FaceParsing)",
+    "_meta": {
+      "title": "FaceParse(FaceParsing)"
+    }
+  },
+  "57": {
+    "inputs": {},
+    "class_type": "FaceParsingModelLoader(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingModelLoader(FaceParsing)"
+    }
+  },
+  "58": {
+    "inputs": {},
+    "class_type": "FaceParsingProcessorLoader(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingProcessorLoader(FaceParsing)"
+    }
+  },
+  "60": {
+    "inputs": {
+      "background": false,
+      "skin": true,
+      "nose": true,
+      "eye_g": true,
+      "r_eye": true,
+      "l_eye": true,
+      "r_brow": true,
+      "l_brow": true,
+      "r_ear": true,
+      "l_ear": true,
+      "mouth": true,
+      "u_lip": true,
+      "l_lip": true,
+      "hair": true,
+      "hat": false,
+      "ear_r": true,
+      "neck_l": false,
+      "neck": false,
+      "cloth": false,
+      "result": [
+        "56",
+        1
+      ]
+    },
+    "class_type": "FaceParsingResultsParser(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingResultsParser(FaceParsing)"
+    }
+  },
+  "61": {
+    "inputs": {
+      "mask": [
+        "60",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "64": {
+    "inputs": {
+      "mode": "interrogate",
+      "question": "What is the gender?",
+      "image": [
+        "1",
+        0
+      ],
+      "blip_model": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "BLIP Analyze Image",
+    "_meta": {
+      "title": "BLIP Analyze Image"
+    }
+  },
+  "65": {
+    "inputs": {
+      "blip_model": "interrogate"
+    },
+    "class_type": "BLIP Model Loader",
+    "_meta": {
+      "title": "BLIP Model Loader"
+    }
+  },
+  "75": {
+    "inputs": {
+      "text": [
+        "287",
+        0
+      ],
+      "label": "Text Prompt"
+    },
+    "class_type": "Text to Console",
+    "_meta": {
+      "title": "Text to Console"
+    }
+  },
+  "124": {
+    "inputs": {
+      "mask1": [
+        "60",
+        0
+      ],
+      "mask2": [
+        "250",
+        0
+      ]
+    },
+    "class_type": "AddMask",
+    "_meta": {
+      "title": "Bitwise(MASK + MASK)"
+    }
+  },
+  "127": {
+    "inputs": {
+      "mask": [
+        "124",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "135": {
+    "inputs": {
+      "dilation": 40,
+      "mask": [
+        "242",
+        0
+      ]
+    },
+    "class_type": "ImpactDilateMask",
+    "_meta": {
+      "title": "Dilate Mask"
+    }
+  },
+  "136": {
+    "inputs": {
+      "kernel_size": 10,
+      "sigma": 15,
+      "mask": [
+        "135",
+        0
+      ]
+    },
+    "class_type": "ImpactGaussianBlurMask",
+    "_meta": {
+      "title": "Gaussian Blur Mask"
+    }
+  },
+  "141": {
+    "inputs": {
+      "blend_percentage": 1,
+      "image_a": [
+        "40",
+        0
+      ],
+      "image_b": [
+        "1",
+        0
+      ],
+      "mask": [
+        "157",
+        0
+      ]
+    },
+    "class_type": "Image Blend by Mask",
+    "_meta": {
+      "title": "Image Blend by Mask"
+    }
+  },
+  "144": {
+    "inputs": {
+      "mode": "interrogate",
+      "question": "What is the persons skin tone?",
+      "image": [
+        "1",
+        0
+      ],
+      "blip_model": [
+        "65",
+        0
+      ]
+    },
+    "class_type": "BLIP Analyze Image",
+    "_meta": {
+      "title": "BLIP Analyze Image"
+    }
+  },
+  "149": {
+    "inputs": {
+      "low_threshold": 100,
+      "high_threshold": 200,
+      "resolution": 1024,
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "CannyEdgePreprocessor",
+    "_meta": {
+      "title": "Canny Edge"
+    }
+  },
+  "150": {
+    "inputs": {
+      "images": [
+        "154",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "151": {
+    "inputs": {
+      "mask": [
+        "153",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "153": {
+    "inputs": {
+      "iterations": 5,
+      "masks": [
+        "127",
+        0
+      ]
+    },
+    "class_type": "Mask Erode Region",
+    "_meta": {
+      "title": "Mask Erode Region"
+    }
+  },
+  "154": {
+    "inputs": {
+      "blend_percentage": 1,
+      "image_a": [
+        "149",
+        0
+      ],
+      "image_b": [
+        "155",
+        0
+      ],
+      "mask": [
+        "151",
+        0
+      ]
+    },
+    "class_type": "Image Blend by Mask",
+    "_meta": {
+      "title": "Image Blend by Mask"
+    }
+  },
+  "155": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1,
+      "color": 0
+    },
+    "class_type": "EmptyImage",
+    "_meta": {
+      "title": "EmptyImage"
+    }
+  },
+  "156": {
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "157": {
+    "inputs": {
+      "blur_radius": 5,
+      "sigma": 1,
+      "image": [
+        "61",
+        0
+      ]
+    },
+    "class_type": "ImageBlur",
+    "_meta": {
+      "title": "ImageBlur"
+    }
+  },
+  "159": {
+    "inputs": {
+      "text": [
+        "160",
+        0
+      ],
+      "find": "person",
+      "replace": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "Text Find and Replace",
+    "_meta": {
+      "title": "Text Find and Replace"
+    }
+  },
+  "160": {
+    "inputs": {
+      "text": ""
+    },
+    "class_type": "JWString",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "232": {
+    "inputs": {
+      "model_name": "segm/person_yolov8m-seg.pt"
+    },
+    "class_type": "UltralyticsDetectorProvider",
+    "_meta": {
+      "title": "UltralyticsDetectorProvider"
+    }
+  },
+  "233": {
+    "inputs": {
+      "threshold": 0.5,
+      "dilation": 0,
+      "segm_detector": [
+        "232",
+        1
+      ],
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "SegmDetectorCombined_v2",
+    "_meta": {
+      "title": "SEGM Detector (combined)"
+    }
+  },
+  "236": {
+    "inputs": {
+      "method": "intensity",
+      "image": [
+        "157",
+        0
+      ]
+    },
+    "class_type": "Image To Mask",
+    "_meta": {
+      "title": "Image To Mask"
+    }
+  },
+  "240": {
+    "inputs": {
+      "masks_a": [
+        "233",
+        0
+      ],
+      "masks_b": [
+        "236",
+        0
+      ]
+    },
+    "class_type": "Masks Subtract",
+    "_meta": {
+      "title": "Masks Subtract"
+    }
+  },
+  "241": {
+    "inputs": {
+      "iterations": 10,
+      "masks": [
+        "240",
+        0
+      ]
+    },
+    "class_type": "Mask Erode Region",
+    "_meta": {
+      "title": "Mask Erode Region"
+    }
+  },
+  "242": {
+    "inputs": {
+      "iterations": 10,
+      "masks": [
+        "241",
+        0
+      ]
+    },
+    "class_type": "Mask Dilate Region",
+    "_meta": {
+      "title": "Mask Dilate Region"
+    }
+  },
+  "246": {
+    "inputs": {
+      "images": [
+        "157",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "250": {
+    "inputs": {
+      "mask": [
+        "233",
+        0
+      ]
+    },
+    "class_type": "InvertMask",
+    "_meta": {
+      "title": "InvertMask"
+    }
+  },
+  "254": {
+    "inputs": {
+      "images": [
+        "151",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "255": {
+    "inputs": {
+      "mask": [
+        "136",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "256": {
+    "inputs": {
+      "images": [
+        "255",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "287": {
+    "inputs": {
+      "a": [
+        "295",
+        0
+      ],
+      "b": " skin tone"
+    },
+    "class_type": "JWStringConcat",
+    "_meta": {
+      "title": "String Concatenate"
+    }
+  },
+  "295": {
+    "inputs": {
+      "delimiter": ", ",
+      "clean_whitespace": "true",
+      "text_a": [
+        "159",
+        0
+      ],
+      "text_b": [
+        "144",
+        0
+      ]
+    },
+    "class_type": "Text Concatenate",
+    "_meta": {
+      "title": "Text Concatenate"
+    }
+  },
+  "296": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "141",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  }
+}

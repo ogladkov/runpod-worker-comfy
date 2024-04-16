@@ -1,0 +1,493 @@
+{
+  "1": {
+    "inputs": {
+      "image": "input.jpg",
+      "upload": "image"
+    },
+    "class_type": "LoadImage",
+    "_meta": {
+      "title": "Load Image"
+    }
+  },
+  "2": {
+    "inputs": {
+      "ip_weight": 1,
+      "cn_strength": 1,
+      "start_at": 0,
+      "end_at": 1,
+      "noise": 0.7000000000000001,
+      "combine_embeds": "average",
+      "instantid": [
+        "3",
+        0
+      ],
+      "insightface": [
+        "4",
+        0
+      ],
+      "control_net": [
+        "5",
+        0
+      ],
+      "image": [
+        "1",
+        0
+      ],
+      "model": [
+        "21",
+        0
+      ],
+      "positive": [
+        "7",
+        0
+      ],
+      "negative": [
+        "8",
+        0
+      ]
+    },
+    "class_type": "ApplyInstantIDAdvanced",
+    "_meta": {
+      "title": "Apply InstantID Advanced"
+    }
+  },
+  "3": {
+    "inputs": {
+      "instantid_file": "ip-adapter.bin"
+    },
+    "class_type": "InstantIDModelLoader",
+    "_meta": {
+      "title": "Load InstantID Model"
+    }
+  },
+  "4": {
+    "inputs": {
+      "provider": "CPU"
+    },
+    "class_type": "InstantIDFaceAnalysis",
+    "_meta": {
+      "title": "InstantID Face Analysis"
+    }
+  },
+  "5": {
+    "inputs": {
+      "control_net_name": "instantid/diffusion_pytorch_model.safetensors"
+    },
+    "class_type": "ControlNetLoader",
+    "_meta": {
+      "title": "Load ControlNet Model"
+    }
+  },
+  "6": {
+    "inputs": {
+      "ckpt_name": "juggernautXL_v9Rundiffusionphoto2.safetensors"
+    },
+    "class_type": "CheckpointLoaderSimple",
+    "_meta": {
+      "title": "Load Checkpoint"
+    }
+  },
+  "7": {
+    "inputs": {
+      "width": 4096,
+      "height": 4096,
+      "crop_w": 0,
+      "crop_h": 0,
+      "target_width": 1024,
+      "target_height": 1024,
+      "text_g": [
+        "100",
+        0
+      ],
+      "text_l": [
+        "100",
+        0
+      ],
+      "clip": [
+        "6",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncodeSDXL",
+    "_meta": {
+      "title": "CLIPTextEncodeSDXL"
+    }
+  },
+  "8": {
+    "inputs": {
+      "width": 4096,
+      "height": 4096,
+      "crop_w": 0,
+      "crop_h": 0,
+      "target_width": 1024,
+      "target_height": 1024,
+      "text_g": "CLIP_G",
+      "text_l": "CLIP_L",
+      "clip": [
+        "6",
+        1
+      ]
+    },
+    "class_type": "CLIPTextEncodeSDXL",
+    "_meta": {
+      "title": "CLIPTextEncodeSDXL"
+    }
+  },
+  "9": {
+    "inputs": {
+      "seed": 942908482601634,
+      "steps": 20,
+      "cfg": 4,
+      "sampler_name": "dpmpp_2m_sde",
+      "scheduler": "karras",
+      "denoise": 1,
+      "model": [
+        "14",
+        0
+      ],
+      "positive": [
+        "2",
+        1
+      ],
+      "negative": [
+        "2",
+        2
+      ],
+      "latent_image": [
+        "10",
+        0
+      ]
+    },
+    "class_type": "KSampler",
+    "_meta": {
+      "title": "KSampler"
+    }
+  },
+  "10": {
+    "inputs": {
+      "width": 1024,
+      "height": 1024,
+      "batch_size": 1
+    },
+    "class_type": "EmptyLatentImage",
+    "_meta": {
+      "title": "Empty Latent Image"
+    }
+  },
+  "11": {
+    "inputs": {
+      "samples": [
+        "9",
+        0
+      ],
+      "vae": [
+        "6",
+        2
+      ]
+    },
+    "class_type": "VAEDecode",
+    "_meta": {
+      "title": "VAE Decode"
+    }
+  },
+  "14": {
+    "inputs": {
+      "multiplier": 1,
+      "model": [
+        "2",
+        0
+      ]
+    },
+    "class_type": "RescaleCFG",
+    "_meta": {
+      "title": "RescaleCFG"
+    }
+  },
+  "17": {
+    "inputs": {
+      "background": false,
+      "skin": false,
+      "nose": false,
+      "eye_g": false,
+      "r_eye": false,
+      "l_eye": false,
+      "r_brow": false,
+      "l_brow": false,
+      "r_ear": false,
+      "l_ear": false,
+      "mouth": false,
+      "u_lip": false,
+      "l_lip": false,
+      "hair": true,
+      "hat": true,
+      "ear_r": false,
+      "neck_l": false,
+      "neck": false,
+      "cloth": false,
+      "result": [
+        "18",
+        1
+      ]
+    },
+    "class_type": "FaceParsingResultsParser(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingResultsParser(FaceParsing)"
+    }
+  },
+  "18": {
+    "inputs": {
+      "model": [
+        "19",
+        0
+      ],
+      "processor": [
+        "20",
+        0
+      ],
+      "image": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "FaceParse(FaceParsing)",
+    "_meta": {
+      "title": "FaceParse(FaceParsing)"
+    }
+  },
+  "19": {
+    "inputs": {},
+    "class_type": "FaceParsingModelLoader(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingModelLoader(FaceParsing)"
+    }
+  },
+  "20": {
+    "inputs": {},
+    "class_type": "FaceParsingProcessorLoader(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingProcessorLoader(FaceParsing)"
+    }
+  },
+  "21": {
+    "inputs": {
+      "weight": 0.7000000000000001,
+      "weight_type": "linear",
+      "combine_embeds": "concat",
+      "start_at": 0,
+      "end_at": 0.7000000000000001,
+      "embeds_scaling": "V only",
+      "model": [
+        "6",
+        0
+      ],
+      "ipadapter": [
+        "102",
+        0
+      ],
+      "image": [
+        "1",
+        0
+      ],
+      "attn_mask": [
+        "17",
+        0
+      ],
+      "clip_vision": [
+        "101",
+        0
+      ]
+    },
+    "class_type": "IPAdapterAdvanced",
+    "_meta": {
+      "title": "IPAdapter Advanced"
+    }
+  },
+  "59": {
+    "inputs": {
+      "background": false,
+      "skin": true,
+      "nose": true,
+      "eye_g": true,
+      "r_eye": true,
+      "l_eye": true,
+      "r_brow": true,
+      "l_brow": true,
+      "r_ear": true,
+      "l_ear": true,
+      "mouth": true,
+      "u_lip": true,
+      "l_lip": true,
+      "hair": true,
+      "hat": true,
+      "ear_r": true,
+      "neck_l": true,
+      "neck": true,
+      "cloth": false,
+      "result": [
+        "18",
+        1
+      ]
+    },
+    "class_type": "FaceParsingResultsParser(FaceParsing)",
+    "_meta": {
+      "title": "FaceParsingResultsParser(FaceParsing)"
+    }
+  },
+  "64": {
+    "inputs": {
+      "mask": [
+        "17",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "65": {
+    "inputs": {
+      "images": [
+        "64",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "67": {
+    "inputs": {
+      "mask": [
+        "59",
+        0
+      ]
+    },
+    "class_type": "MaskToImage",
+    "_meta": {
+      "title": "Convert Mask to Image"
+    }
+  },
+  "68": {
+    "inputs": {
+      "images": [
+        "67",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "70": {
+    "inputs": {
+      "images": [
+        "1",
+        0
+      ]
+    },
+    "class_type": "PreviewImage",
+    "_meta": {
+      "title": "Preview Image"
+    }
+  },
+  "74": {
+    "inputs": {
+      "filename_prefix": "ComfyUI",
+      "images": [
+        "11",
+        0
+      ]
+    },
+    "class_type": "SaveImage",
+    "_meta": {
+      "title": "Save Image"
+    }
+  },
+  "96": {
+    "inputs": {
+      "mode": "interrogate",
+      "question": "What the gender?",
+      "image": [
+        "1",
+        0
+      ],
+      "blip_model": [
+        "97",
+        0
+      ]
+    },
+    "class_type": "BLIP Analyze Image",
+    "_meta": {
+      "title": "BLIP Analyze Image"
+    }
+  },
+  "97": {
+    "inputs": {
+      "blip_model": "interrogate"
+    },
+    "class_type": "BLIP Model Loader",
+    "_meta": {
+      "title": "BLIP Model Loader"
+    }
+  },
+  "98": {
+    "inputs": {
+      "text": [
+        "100",
+        0
+      ],
+      "label": "Positive prompt:"
+    },
+    "class_type": "Text to Console",
+    "_meta": {
+      "title": "Text to Console"
+    }
+  },
+  "99": {
+    "inputs": {
+      "text": ""
+    },
+    "class_type": "JWString",
+    "_meta": {
+      "title": "String"
+    }
+  },
+  "100": {
+    "inputs": {
+      "text": [
+        "99",
+        0
+      ],
+      "find": "person",
+      "replace": [
+        "96",
+        0
+      ]
+    },
+    "class_type": "Text Find and Replace",
+    "_meta": {
+      "title": "Text Find and Replace"
+    }
+  },
+  "101": {
+    "inputs": {
+      "clip_name": "CLIP-ViT-H-14-laion2B-s32B-b79K.safetensors"
+    },
+    "class_type": "CLIPVisionLoader",
+    "_meta": {
+      "title": "Load CLIP Vision"
+    }
+  },
+  "102": {
+    "inputs": {
+      "ipadapter_file": "ip-adapter-plus_sdxl_vit-h.safetensors"
+    },
+    "class_type": "IPAdapterModelLoader",
+    "_meta": {
+      "title": "IPAdapter Model Loader"
+    }
+  }
+}
