@@ -1,0 +1,1 @@
+docker build -t runpod-worker-comfy --platform linux/amd64 .

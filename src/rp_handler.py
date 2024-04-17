@@ -288,15 +288,11 @@ def process_output_images(outputs, job_id):
         if os.environ.get("BUCKET_ENDPOINT_URL", False):
             # URL to image in AWS S3
             image = rp_upload.upload_image(job_id, local_image_path)
-            print(
-                "runpod-worker-comfy - the image was generated and uploaded to AWS S3"
-            )
+            print("runpod-worker-comfy - the image was generated and uploaded to AWS S3")
         else:
             # base64 image
             image = base64_encode(local_image_path)
-            print(
-                "runpod-worker-comfy - the image was generated and converted to base64"
-            )
+            print("runpod-worker-comfy - the image was generated and converted to base64")
 
         return {
             "status": "success",
@@ -325,10 +321,6 @@ def handler(job):
     """
     job_input = job["input"]
 
-    # Validate 'api_key' in input
-    if job_input.get("api_key") != os.environ.get("API_KEY"):
-        return {"error": f"Invalid API Key: {job_input.get('api_key')}"}
-
     # Make sure that the input is valid
     validated_data, error_message = validate_input(job_input)
     if error_message:
@@ -338,58 +330,56 @@ def handler(job):
     images = validated_data.get("images")
     fedata = validated_data.get("fedata")
 
-    # Read prompts database
-    with open('./prompts_db.json', 'r') as j:
-        prompts_db = json.load(j)
+    if fedata['prompt_id'] is None:
+        print('--Create image--')
+        # Read prompts database
+        with open('./prompts_db.json', 'r') as j:
+            prompts_db = json.load(j)
 
-    # Make sure that the ComfyUI API is available
-    check_server(
-        f"http://{COMFY_HOST}",
-        COMFY_API_AVAILABLE_MAX_RETRIES,
-        COMFY_API_AVAILABLE_INTERVAL_MS,
-    )
+        # Make sure that the ComfyUI API is available
+        check_server(
+            f"http://{COMFY_HOST}",
+            COMFY_API_AVAILABLE_MAX_RETRIES,
+            COMFY_API_AVAILABLE_INTERVAL_MS,
+        )
 
-    # Upload images if they exist
-    upload_result = upload_images(images)
+        # Upload images if they exist
+        upload_result = upload_images(images)
 
-    if upload_result["status"] == "error":
-        return upload_result
+        if upload_result["status"] == "error":
+            return upload_result
 
-    # Queue the workflow
-    try:
-        workflow = get_workflow(prompts_db, fedata)
-        queued_workflow = queue_workflow(workflow)
-        prompt_id = queued_workflow["prompt_id"]
-        print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")
-    except Exception as e:
-        return {"error": f"Error queuing workflow: {str(e)}"}
+        # Queue the workflow
+        try:
+            workflow = get_workflow(prompts_db, fedata)
+            queued_workflow = queue_workflow(workflow)
+            prompt_id = queued_workflow["prompt_id"]
+            print(f"runpod-worker-comfy - queued workflow with ID {prompt_id}")
+            return {'result': prompt_id, 'error': None}
 
-    # Poll for completion
-    print(f"runpod-worker-comfy - wait until image generation is complete")
-    retries = 0
-    try:
-        while retries < COMFY_POLLING_MAX_RETRIES:
-            history = get_history(prompt_id)
+        except Exception as e:
+            print(f"Error queuing workflow: {str(e)}")
+            return {'result': None, 'error': str(e)}
 
-            # Exit the loop if we have found the history
-            if prompt_id in history and history[prompt_id].get("outputs"):
-                break
+    else:
+        print('--Receive image--')
+        prompt_id = fedata["prompt_id"]
+
+        # Poll for completion
+        history = get_history(prompt_id)
+
+        if history.get(prompt_id) is not None:
+            outputs = history.get(prompt_id).get("outputs")
+            images_result = process_output_images(outputs, job["id"])
+
+            if images_result['status'] == 'success':
+                return {'result': images_result['message'], 'error': None}
+
             else:
-                # Wait before trying again
-                time.sleep(COMFY_POLLING_INTERVAL_MS / 1000)
-                retries += 1
+                return {'result': None, 'error': images_result['error']}
+
         else:
-            return {"error": "Max retries reached while waiting for image generation"}
-    except Exception as e:
-        return {"error": f"Error waiting for image generation: {str(e)}"}
-
-    # Get the generated image and return it as URL in an AWS bucket or as base64
-    images_result = process_output_images(history[prompt_id].get("outputs"), job["id"])
-
-    result = {**images_result, "refresh_worker": REFRESH_WORKER}
-
-    return result
-
+            return {'result': None, 'error': 'Task is in progress...'}
 
 # Start the handler only if this script is run directly
 if __name__ == "__main__":
