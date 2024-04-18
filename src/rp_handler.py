@@ -332,9 +332,6 @@ def handler(job):
 
     if fedata['prompt_id'] is None:
         print('--Create image--')
-        # Read prompts database
-        with open('./prompts_db.json', 'r') as j:
-            prompts_db = json.load(j)
 
         # Make sure that the ComfyUI API is available
         check_server(
@@ -351,6 +348,7 @@ def handler(job):
 
         # Queue the workflow
         try:
+            prompts_db = fedata['prompts_db']
             workflow = get_workflow(prompts_db, fedata)
             queued_workflow = queue_workflow(workflow)
             prompt_id = queued_workflow["prompt_id"]
