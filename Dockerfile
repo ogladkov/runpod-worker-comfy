@@ -90,7 +90,6 @@ COPY checkpoints/insightface/models/antelopev2/* /comfyui/models/insightface/mod
 COPY checkpoints/insightface/inswapper_128.onnx /comfyui/models/insightface/
 
 # Copy the prompt database and workflows
-COPY ./prompts_db.json /comfyui/
 COPY ./workflows/*.json /comfyui/workflows/
 
 # Add the start and the handler
